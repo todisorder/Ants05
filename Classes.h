@@ -135,7 +135,7 @@ public:
     Ant () : AntDepositedPhero(numxx, numyy){
         AntPosX = 0.;
         AntPosY = 0.;
-        AntVelX = 0.1;
+        AntVelX = -0.1;
         AntVelY = 0.1;
         IsReturning = false;
     }

@@ -1,5 +1,5 @@
 CC=g++
-Version=-04
+Version=-05
 OBJ=AntsIBM$(Version).o
 #CFLAGS=-Wall -g -std=c++11
 CFLAGS= -g -std=c++11
