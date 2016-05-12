@@ -5,7 +5,10 @@ https://github.com/todisorder/Ants05.git
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 >> 12 de maio 2016
-> 
+> Agora vou tentar definir a fero analiticamente!
+> não é simples…
+> Acho que percebo porque é que os outros fizeram isso.
+> não é possível que a fero, assim, tenha em conta o bordo, acho eu.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Ants IBM GitHub:
