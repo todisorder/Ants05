@@ -236,8 +236,8 @@ double Angle(double X, double Y)
 /////////////////////////////////////////////////
 double RegularizingFunction(double X)
 {
-    double aux =  pow(RegularizingEpsilon*RegularizingEpsilon+X*X,0.5);
-//    double aux = X;
+//    double aux =  pow(RegularizingEpsilon*RegularizingEpsilon+X*X,0.5);
+    double aux = X;
     return aux;
 }
 /////////////////////////////////////////////////
@@ -255,8 +255,8 @@ double SensitivityFunction(double c){
     
     double aux;
     
-        aux = c;  SensitivityMethod = "Identity";
-//    aux = sqrt(c*c + Threshold*Threshold);  SensitivityMethod = "Sqrt(c^2 + c_*^2)";
+//        aux = c;  SensitivityMethod = "Identity";
+    aux = sqrt(c*c + Threshold*Threshold);  SensitivityMethod = "Sqrt(c^2 + c_*^2)";
     //   aux = max(Threshold,c);     SensitivityMethod = "max(c, c_*)";
     
     return aux;

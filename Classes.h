@@ -142,7 +142,7 @@ public:
     
     //  Constructors
     Ant () : AntDepositedPhero(numxx, numyy){
-        AntPosX = 0.;
+        AntPosX = 1.;
         AntPosY = 0.;
         AntVelX = -0.1;
         AntVelY = 0.1;
@@ -351,16 +351,19 @@ double Ant::PheromoneGradientX(){
     double elapsed_time = 0.;
     double aux1 = 0.;
     double aux2 = 0.;
+    double aux3 = 0.;
     for (int droplet=1; droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
-        aux2 += Heat(AntPosX+delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        aux2 += Heat(AntPosX+0.001*delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
+        aux3 += -2.*( (AntPosX-DropletCentersX(droplet,1))/(4.*Diffusion*elapsed_time)) * aux1;   //  real gradient
     }
 
     
     
-    return (aux2 - aux1)/delta_x;
+    return (aux2 - aux1)/(0.001*delta_x);
+//    return aux3;
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneGradientX
@@ -388,16 +391,20 @@ double Ant::PheromoneGradientY(){
     double elapsed_time = 0.;
     double aux1 = 0.;
     double aux2 = 0.;
+    double aux3 = 0.;
     for (int droplet=1; droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
-        aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+0.001*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
+        aux3 += -2.*( (AntPosY-DropletCentersY(droplet,1))/(4.*Diffusion*elapsed_time)) * aux1;   //  real gradient
+
     }
     
     
     
-    return (aux2 - aux1)/delta_x;
+    return (aux2 - aux1)/(0.001*delta_y);
+//    return aux3;
 
     
     
