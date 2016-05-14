@@ -25,6 +25,10 @@ using namespace std;
 static double const numxx = 200.;
 static double const numyy = 200.;
 
+static int const NumberOfAnts = 8;
+
+static int const LARGE_NUMBER = 100000;
+
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;
 static double const Ln2 = 0.6931471806;
@@ -48,7 +52,7 @@ static double const Turn_off_random = 1.*1.;    //*0.02;
 static double const RegularizingEpsilon = 0.01;
 
 //  This is pheromone detection threshold, but not exactly. It's complicated.
-static double const Threshold = 0.05; //   Explained in the Readme...   0.1
+static double const Threshold = 0.005; //   Explained in the Readme...   0.1
 
 
 //////////////////////////////////////////////////////
@@ -101,8 +105,14 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 
 // tempo final
 //static double const TFINAL = 0.1;
-static double const delta_t = 0.05;   //     0.005
+static double const delta_t = 0.05;   //     0.05
 
+//  Pheromone Diffusion:
+static double const Diffusion = 0.01;
+
+//  How much pheromone each ant deposits... not sure if I want this,
+//  or the member vector in the Ant class.
+static double const DropletAmount = 0.01;
 
 string SensitivityMethod;
 
@@ -226,8 +236,8 @@ double Angle(double X, double Y)
 /////////////////////////////////////////////////
 double RegularizingFunction(double X)
 {
-    double aux =  pow(RegularizingEpsilon*RegularizingEpsilon
-                      +X*X,0.5);
+    double aux =  pow(RegularizingEpsilon*RegularizingEpsilon+X*X,0.5);
+//    double aux = X;
     return aux;
 }
 /////////////////////////////////////////////////
@@ -245,8 +255,8 @@ double SensitivityFunction(double c){
     
     double aux;
     
-    //    aux = c;  SensitivityMethod = "Identity";
-    aux = sqrt(c*c + Threshold*Threshold);  SensitivityMethod = "Sqrt(c^2 + c_*^2)";
+        aux = c;  SensitivityMethod = "Identity";
+//    aux = sqrt(c*c + Threshold*Threshold);  SensitivityMethod = "Sqrt(c^2 + c_*^2)";
     //   aux = max(Threshold,c);     SensitivityMethod = "max(c, c_*)";
     
     return aux;
@@ -254,6 +264,31 @@ double SensitivityFunction(double c){
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 //      End Sensitivity Function
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//      Heat Equation fundamental solution
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+double Heat(double XX, double YY, double elapsed_time, double amount){
+    
+    double aux = 0.;
+//    cout <<"????? = " << elapsed_time << endl;
+    
+    aux = (1. / (4.*Pi* Diffusion * elapsed_time));
+    aux *= exp(-(XX*XX + YY*YY) / (4.*Diffusion*elapsed_time));
+    aux *= amount;
+    
+    return aux;
+}
+
+
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//      END Heat Equation fundamental solution
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
@@ -346,7 +381,7 @@ int main (void){
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    int NN = 10;
+    int NN = NumberOfAnts;
     int totalantnumber = NN;
     
     Ant * Pop;
@@ -371,18 +406,27 @@ int main (void){
     //////////////////////////////////////////////////////////////////////
 
     for (int iter=0; iter <= numiter; iter++) {
-        
+
+        Ant::DropletNumberToAdd = 0;
+
         for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
             
+            Ant::CurrentTime = iter*delta_t;
+
             Pop[antnumber].Walk();
-            
+
 //            cout << "The ForceX:   " << Pop[antnumber].ForceX() << endl;
 //            cout << "The ForceY:   " << Pop[antnumber].ForceY() << endl;
 //            cout << "Deposited Phero:   " << Pop[antnumber].AntDepositedPhero(3,3) << endl;
         }
+        
+        Ant::DropletNumber += Ant::DropletNumberToAdd;
+        
         for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
             
             Ant::UpdatePhero(Pop[antnumber].AntDepositedPhero);
+            
+//            cout << "DN = " << Ant::DropletNumber << endl;
             
             Pop[antnumber].AntFile << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
             

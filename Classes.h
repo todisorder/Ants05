@@ -89,6 +89,7 @@ class Ant;
 /////HH/////////////HH///HH////////HHHH////////HH/////////////////////
 ////HH///////////////HH//HH//////////HH////////HH/////////////////////
 //////////////////////////////////////////////////////////////////////
+//     ___      .__   __  .___________.    _______.
 //    /   \     |  \ |  | |           |   /       |
 //   /  ^  \    |   \|  | `---|  |----`  |   (----`
 //  /  /_\  \   |  . `  |     |  |        \   \
@@ -104,7 +105,14 @@ class Ant
 {
 public:
     
+    static double CurrentTime;
     static Matrix Pheromone;
+    static int DropletNumber;
+    static int DropletNumberToAdd;
+    static Matrix DropletTimes;
+    static Matrix DropletCentersX;
+    static Matrix DropletCentersY;
+//    static Matrix DropletAmounts;
                         //  ^^^cf. http://www.tutorialspoint.com/cplusplus/cpp_static_members.htm
                         //  This way (a static Matrix) I don't need the Pheromone class.
                         //  But dx, dy, etc must now be defined in the beggining of the main file.
@@ -119,6 +127,7 @@ public:
     Matrix AntDepositedPhero;
     string AntFilename;
     ofstream AntFile;
+    
     
     void Walk();
 
@@ -158,7 +167,14 @@ public:
     //  End Constructors
     
 };
+double Ant::CurrentTime = 0.;
 Matrix Ant::Pheromone = Zeros(numxx,numyy);
+int Ant::DropletNumber = 1;
+int Ant::DropletNumberToAdd = 0;
+Matrix Ant::DropletCentersX = Zeros(LARGE_NUMBER,1);
+Matrix Ant::DropletCentersY = Zeros(LARGE_NUMBER,1);
+Matrix Ant::DropletTimes = Zeros(LARGE_NUMBER,1);
+//Matrix Ant::DropletAmounts = Zeros(LARGE_NUMBER,1);
 
 /********************************************************************/
 //					END Class Ant
@@ -273,8 +289,11 @@ void Ant::Walk(){
     
     AntDepositedPhero(ii,jj) = 0.01;     //  TEMP!!!!!!
 
+    DropletNumberToAdd ++    ;
     
-
+    DropletCentersX(DropletNumber,1) = AntPosX;
+    DropletCentersY(DropletNumber,1) = AntPosY;
+    DropletTimes(DropletNumber,1) = CurrentTime;
 
 }
 //////////////////////////////////////////////////////////////////////
@@ -288,18 +307,25 @@ void Ant::Walk(){
 //////////////////////////////////////////////////////////////////////
 
 double Ant::PheromoneConcentration(){
-//    double iofXpos = (AntPosX - x_1)/delta_x;
-//    iofXpos = max(1.,iofXpos);
-//    iofXpos = min(numxx,iofXpos);
-//    double jofYpos = (AntPosY - y_1)/delta_y;
-//    jofYpos = max(1.,jofYpos);
-//    jofYpos = min(numyy,jofYpos);
-    double iofXpos = IndexXOf(AntPosX);
-    double jofYpos = IndexYOf(AntPosY);
-//    cout << "AAAHH:   " << iofXpos << ",,,,"<< jofYpos << endl;
-//    cout << "Estou dentro de PheromoneConcentration:  " << Pheromone(1,1) <<endl;
-    return SensitivityFunction(Pheromone(iofXpos,jofYpos));
-//    return Pheromone(iofXpos,jofYpos);
+//    double iofXpos = IndexXOf(AntPosX);
+//    double jofYpos = IndexYOf(AntPosY);
+////    cout << "AAAHH:   " << iofXpos << ",,,,"<< jofYpos << endl;
+////    cout << "Estou dentro de PheromoneConcentration:  " << Pheromone(1,1) <<endl;
+//    return SensitivityFunction(Pheromone(iofXpos,jofYpos));
+////    return Pheromone(iofXpos,jofYpos);
+    
+    double current_time = CurrentTime;
+    double elapsed_time = 0.;
+    double aux = 0.;
+    
+    for (int droplet=1; droplet < DropletNumber; droplet++) {
+        elapsed_time = current_time - DropletTimes(droplet,1);
+        aux += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        
+    }
+    
+    return SensitivityFunction(aux);
+    
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneConcentration
@@ -311,16 +337,30 @@ double Ant::PheromoneConcentration(){
 //                  Pointwise evaluation of Pheromone Gradient.
 //////////////////////////////////////////////////////////////////////
 double Ant::PheromoneGradientX(){
-    double aux=0.;
-    double iofXpos = IndexXOf(AntPosX);
-    double jofYpos = IndexYOf(AntPosY);
-    if (iofXpos < numxx) {
-        aux = Pheromone(iofXpos+1,jofYpos) - Pheromone(iofXpos,jofYpos);
-        aux = aux/delta_x;
-    } else {
-        aux = 0.;       // TEMP in boundary!!
+//    double aux=0.;
+//    double iofXpos = IndexXOf(AntPosX);
+//    double jofYpos = IndexYOf(AntPosY);
+//    if (iofXpos < numxx) {
+//        aux = Pheromone(iofXpos+1,jofYpos) - Pheromone(iofXpos,jofYpos);
+//        aux = aux/delta_x;
+//    } else {
+//        aux = 0.;       // TEMP in boundary!!
+//    }
+    
+    double current_time = CurrentTime;
+    double elapsed_time = 0.;
+    double aux1 = 0.;
+    double aux2 = 0.;
+    for (int droplet=1; droplet < DropletNumber; droplet++) {
+        elapsed_time = current_time - DropletTimes(droplet,1);
+        aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        aux2 += Heat(AntPosX+delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        
     }
-    return aux;
+
+    
+    
+    return (aux2 - aux1)/delta_x;
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneGradientX
@@ -334,22 +374,39 @@ double Ant::PheromoneGradientX(){
 //                  Pointwise evaluation of Pheromone Gradient.
 //////////////////////////////////////////////////////////////////////
 double Ant::PheromoneGradientY(){
-    double aux=0.;
-    double iofXpos = IndexXOf(AntPosX);
-    double jofYpos = IndexYOf(AntPosY);
-    if (jofYpos < numyy) {
-        aux = Pheromone(iofXpos,jofYpos+1) - Pheromone(iofXpos,jofYpos);
-        aux = aux/delta_y;
-    } else {
-        aux = 0.;
+//    double aux=0.;
+//    double iofXpos = IndexXOf(AntPosX);
+//    double jofYpos = IndexYOf(AntPosY);
+//    if (jofYpos < numyy) {
+//        aux = Pheromone(iofXpos,jofYpos+1) - Pheromone(iofXpos,jofYpos);
+//        aux = aux/delta_y;
+//    } else {
+//        aux = 0.;
+//    }
+//    return aux;
+    double current_time = CurrentTime;
+    double elapsed_time = 0.;
+    double aux1 = 0.;
+    double aux2 = 0.;
+    for (int droplet=1; droplet < DropletNumber; droplet++) {
+        elapsed_time = current_time - DropletTimes(droplet,1);
+        aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+        
     }
-    return aux;
+    
+    
+    
+    return (aux2 - aux1)/delta_x;
+
+    
+    
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneGradientY
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-//_______   ______   .______        ______  _______   ////////////////
+//._______   ______   .______        ______  _______   ////////////////
 //|   ____| /  __  \  |   _  \      /      ||   ____| ////////////////
 //|  |__   |  |  |  | |  |_)  |    |  ,----'|  |__    ////////////////
 //|   __|  |  |  |  | |      /     |  |     |   __|   ////////////////
@@ -461,6 +518,9 @@ void Ant::UpdatePhero(Matrix& mat){
             Pheromone(i,j) = (1. - delta_t*0.001)*Pheromone(i,j) + 1.*0.1*mat(i,j);
         }
     }
+    
+    
+    
     
 }
 
