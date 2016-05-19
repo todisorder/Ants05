@@ -25,7 +25,7 @@ using namespace std;
 static double const numxx = 200.;
 static double const numyy = 200.;
 
-static int const NumberOfAnts = 8;
+static int const NumberOfAnts = 2;
 
 static int const LARGE_NUMBER = 100000;
 
@@ -80,7 +80,7 @@ static double const SensingAreaRadius = .4;         //  .5
 static double const SENSING_AREA_RADIUS = SensingAreaRadius / X_hat_in_cm;         //
 
 //  Sensing Area Half Angle
-static double const SensingAreaHalfAngle = Pi/3.;         //
+static double const SensingAreaHalfAngle = Pi/4.;         //
 
 //  Converter quantidade de feromona numa taxa (velocidade sem espaço). Lambda é 1/(feromona * tempo).
 //  A quantidade padrão de feromona dá uma taxa de Lambda / t_hat.
@@ -108,11 +108,11 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 static double const delta_t = 0.05;   //     0.05
 
 //  Pheromone Diffusion:
-static double const Diffusion = 0.01;
+static double const Diffusion = 0.00001;
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 0.01;
+static double const DropletAmount = 1.*.001;
 
 string SensitivityMethod;
 
@@ -279,6 +279,7 @@ double Heat(double XX, double YY, double elapsed_time, double amount){
     
     aux = (1. / (4.*Pi* Diffusion * elapsed_time));
     aux *= exp(-(XX*XX + YY*YY) / (4.*Diffusion*elapsed_time));
+    aux *= exp(-.00001*elapsed_time); // Evaporation
     aux *= amount;
     
     return aux;
@@ -371,12 +372,6 @@ int main (void){
     Numerics data;
     int numiter = data.numiter;
     
-//    Ant::Pheromone.Print();
-//    Ant formiga3;
-//    cout << "LALALA:  " << Ant::Pheromone(1,1) <<endl;
-//    formiga3.Walk();
-//    cout << "LALALA 2:  " << Ant::Pheromone(1,1) <<endl;
-//    cout << "LALALA 4:" << formiga3.PheromoneConcentration() << endl;
     
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
@@ -415,8 +410,8 @@ int main (void){
 
             Pop[antnumber].Walk();
 
-//            cout << "The ForceX:   " << Pop[antnumber].ForceX() << endl;
-//            cout << "The ForceY:   " << Pop[antnumber].ForceY() << endl;
+            cout << "The ForceX:   " << Pop[antnumber].ForceX() << endl;
+            cout << "The ForceY:   " << Pop[antnumber].ForceY() << endl;
 //            cout << "Deposited Phero:   " << Pop[antnumber].AntDepositedPhero(3,3) << endl;
         }
         
@@ -424,10 +419,14 @@ int main (void){
         
         for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
             
-            Ant::UpdatePhero(Pop[antnumber].AntDepositedPhero);
+//            Ant::UpdatePhero(Pop[antnumber].AntDepositedPhero);
             
 //            cout << "DN = " << Ant::DropletNumber << endl;
-            
+            if (ChangedSide == 1) {
+                Pop[antnumber].AntFile << endl;
+                ChangedSide = 0;
+            }
+
             Pop[antnumber].AntFile << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
             
         }
@@ -438,7 +437,15 @@ int main (void){
         cout << "Iter: " <<iter << endl;
     }// End of time cycle
     
-    cout << "Universal Phero:   " << Ant::Pheromone(2,2) << endl;
+    
+//    Ant::DropletCentersX.Print();
+//    Ant::DropletCentersY.Print();
+    cout << "Building Pheromone... " << endl;
+    Ant::BuildPheromone();
+
+//    for (int i=1; i<=40; i++) {
+//        cout << " no ponto (" << Ant::DropletCentersX(i,1)<<","<< Ant::DropletCentersY(i,1) <<") e tempo "<< Ant::DropletTimes(i,1)<< " Ha phero."<< endl;
+//    }
     
     ofstream Phero;
     Phero.open("Phero.txt");

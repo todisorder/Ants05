@@ -130,7 +130,8 @@ public:
     
     
     void Walk();
-
+    
+    static void BuildPheromone();
     static void UpdatePhero(Matrix& mat);
 //    double IndexXOf(double position);    // Compute matrix index i associated to position.
 //    double IndexYOf(double position);    // Compute matrix index j associated to position.
@@ -287,12 +288,15 @@ void Ant::Walk(){
     AntVelX = AntVelXNew;
     AntVelY = AntVelYNew;
     
-    AntDepositedPhero(ii,jj) = 0.01;     //  TEMP!!!!!!
+//    AntDepositedPhero(ii,jj) = 0.01;     //  TEMP!!!!!!
 
     DropletNumberToAdd ++    ;
     
-    DropletCentersX(DropletNumber,1) = AntPosX;
-    DropletCentersY(DropletNumber,1) = AntPosY;
+    DropletCentersX(DropletNumber+DropletNumberToAdd,1) = AntPosX;
+    DropletCentersY(DropletNumber+DropletNumberToAdd,1) = AntPosY;
+    
+//    cout <<"Acabo de marcar phero numero " << DropletNumber<< " no ponto (" << AntPosX<<","<<AntPosY<<")"<<endl;
+    
     DropletTimes(DropletNumber,1) = CurrentTime;
 
 }
@@ -318,11 +322,14 @@ double Ant::PheromoneConcentration(){
     double elapsed_time = 0.;
     double aux = 0.;
     
-    for (int droplet=1; droplet < DropletNumber; droplet++) {
+    for (int droplet=1; droplet < DropletNumber ; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+
+//        cout <<"Acabo de ler phero numero " << droplet<< " no ponto (" << AntPosX<<","<<AntPosY<<"). "<< "Senti phero: " << SensitivityFunction(aux)<<endl;
         
     }
+//    cout << "Senti phero: " << (aux) <<endl;
     
     return SensitivityFunction(aux);
     
@@ -453,6 +460,8 @@ double Ant::ForceX(){
     
     aux = aux/auxX;
     
+//    cout << "Grad x: " << PheromoneGradientX() << endl;
+    
     return aux;
 }
 //////////////////////////////////////////////////////////////////////
@@ -522,12 +531,33 @@ void Ant::UpdatePhero(Matrix& mat){
     //  the pheromone.
     for (int i=1; i<=numxx; i++) {
         for (int j=1; j<=numyy; j++) {
-            Pheromone(i,j) = (1. - delta_t*0.001)*Pheromone(i,j) + 1.*0.1*mat(i,j);
+//            Pheromone(i,j) = (1. - delta_t*0.001)*Pheromone(i,j) + 1.*0.1*mat(i,j);
         }
     }
     
     
-    
+}
+
+void Ant::BuildPheromone(){
+    double current_time = CurrentTime;
+    double elapsed_time = 0.;
+    double aux = 0.;
+
+    for (int i=1; i<=numxx; i++) {
+        for (int j=1; j<=numyy; j++) {
+            aux = 0.;
+            for (int droplet=1; droplet < DropletNumber-DropletNumberToAdd; droplet++) {
+                elapsed_time = current_time - DropletTimes(droplet,1);
+//                cout << "active droplet " << droplet << endl;
+                aux += Heat(x_1+i*delta_x-DropletCentersX(droplet,1),y_1+j*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+                
+            }
+
+            
+            Pheromone(i,j) = aux;
+        }
+    }
+
     
 }
 
