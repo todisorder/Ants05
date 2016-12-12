@@ -369,8 +369,8 @@ double Ant::PheromoneGradientX(){
 
     
     
-    return (aux2 - aux1)/(0.001*delta_x);
-//    return aux3;
+//    return (aux2 - aux1)/(0.001*delta_x);
+    return aux3;
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneGradientX
@@ -410,8 +410,8 @@ double Ant::PheromoneGradientY(){
     
     
     
-    return (aux2 - aux1)/(0.001*delta_y);
-//    return aux3;
+//    return (aux2 - aux1)/(0.001*delta_y);
+    return aux3;
 
     
     

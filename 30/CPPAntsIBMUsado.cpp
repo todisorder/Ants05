@@ -25,7 +25,7 @@ using namespace std;
 static double const numxx = 200.;
 static double const numyy = 200.;
 
-static int const NumberOfAnts = 5;
+static int const NumberOfAnts = 2;
 
 static int const LARGE_NUMBER = 100000;
 
@@ -108,7 +108,7 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 static double const delta_t = 0.05;   //     0.05
 
 //  Pheromone Diffusion:
-static double const Diffusion = 0.0002;
+static double const Diffusion = 0.001;
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
