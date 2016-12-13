@@ -25,7 +25,7 @@ using namespace std;
 static double const numxx = 100.;
 static double const numyy = 100.;
 
-static int const NumberOfAnts = 5;
+static int const NumberOfAnts = 1;
 
 static int const LARGE_NUMBER = 100000;
 
@@ -52,7 +52,7 @@ static double const Turn_off_random = 1.*1.;    //*0.02;
 static double const RegularizingEpsilon = 0.01;
 
 //  This is pheromone detection threshold, but not exactly. It's complicated.
-static double const Threshold = 0.005; //   Explained in the Readme...   0.1
+static double const Threshold = 0.00001; //   Explained in the Readme...   0.1
 
 
 //////////////////////////////////////////////////////
@@ -108,11 +108,14 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 static double const delta_t = 0.05;   //     0.05
 
 //  Pheromone Diffusion:
-static double const Diffusion = 0.0002;
+static double const Diffusion = 0.005;
+
+//  Pheromone Evaporation:
+static double const Evaporation = 0.03;        //0.001
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 1.*.001;
+static double const DropletAmount = 0.*.00001;        //0.001
 
 string SensitivityMethod;
 
@@ -130,16 +133,16 @@ string SensitivityMethod;
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 // extremo inferior do intervalo em x (cm)
-static double const x_1_cm = -5.;      //-25
+static double const x_1_cm = -25.;      //-5
 
 // extremo superior do intervalo em x (cm)
-static double const x_2_cm = 5.;       //25
+static double const x_2_cm = 25.;       //5
 
 // extremo inferior do intervalo em y (cm)
-static double const y_1_cm =  -5.;     //-50
+static double const y_1_cm =  -25.;     //-5
 
 // extremo superior do intervalo em y (cm)
-static double const y_2_cm = 5.;       //50
+static double const y_2_cm = 25.;       //5
 
 // extremo inferior do intervalo em x
 static double const x_1 = x_1_cm / X_hat_in_cm;
@@ -163,8 +166,8 @@ static double const delta_y = (y_2-y_1)/numyy;;
 ////////////////////////////
 // Parametro temporário para a pheromone
 ////////////////////////////
-static double const PheroNarrow = 1.;
-static double const PheroHigh = 1.;
+static double const PheroNarrow = 5.;
+static double const PheroHigh = .0002;
 ////////////////////////////
 // End Parametro temporário para a pheromone
 ////////////////////////////
@@ -279,7 +282,7 @@ double Heat(double XX, double YY, double elapsed_time, double amount){
     
     aux = (1. / (4.*Pi* Diffusion * elapsed_time));
     aux *= exp(-(XX*XX + YY*YY) / (4.*Diffusion*elapsed_time));
-    aux *= exp(-.001*elapsed_time); // Evaporation
+    aux *= exp(-Evaporation*elapsed_time); // Evaporation .001
     aux *= amount;
     
     return aux;
@@ -333,7 +336,12 @@ double Heat(double XX, double YY, double elapsed_time, double amount){
 /////////////////////////////////////////////////
 
 
-
+//  cf. http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+double Sinal(double aa){
+    if (aa > 0.) return 1.;
+    if (aa < 0.) return -1.;
+    return 0.;
+}
 
 
 
@@ -352,6 +360,72 @@ double Heat(double XX, double YY, double elapsed_time, double amount){
 #include "Classes.h"
 //#include "matriz.h"
 //#include "Matrix.h"
+
+
+
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+// Print Info
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+void PrintInfo(double delta_t, string COMM, Numerics data){
+    
+    ofstream tempfile;
+    tempfile.open("DataUsed.txt");
+    string tempinfo;
+    
+    tempfile << "#############################################################"<<endl;
+    tempfile << "#############################################################"<<endl;
+    tempfile << "#############################################################"<<endl;
+    tempfile << "# dt = "<< delta_t<< endl;
+    tempfile << "# No. of Iterations = "<< data.numiter << endl;
+    tempfile << "# Final Time = "<< data.numiter * delta_t << endl;
+    tempfile << "#" << "\t" << COMM <<endl;
+    tempfile << "# X points = "<< data.xx << endl;
+    tempfile << "# Y points = "<< data.yy << endl;
+    tempfile << "------------------------------------------------------" << endl;
+    tempfile << "Sensing Area Radius (cm)       " << SensingAreaRadius << endl;
+    tempfile << "Sensing Area Radius (X_hat)    " << SENSING_AREA_RADIUS << endl;
+    tempfile << "Sensing Half Angle             Pi/" << Pi/SensingAreaHalfAngle << endl;
+    tempfile << "Lambda                         " << Lambda << endl;
+    tempfile << "Diffusion                      " << Diffusion << endl;
+    tempfile << "Evaporation                    " << Evaporation << endl;
+    tempfile << "Droplet Amount                 " << DropletAmount << endl;
+    tempfile << "------------------------------------------------------" << endl;
+    //    tempfile << "delta t (seconds) = " << delta_t * THatSec << endl;
+    //    tempfile << "Tfinal (t hat) = " << tt*delta_t<< endl;
+    //    tempfile << "Tfinal (seconds) = " << tt*delta_t * THatSec << endl;
+    //    tempfile << "Tfinal (minutos) = " << tt*delta_t * THatSec / 60.<< endl;
+    //    tempfile << "Tfinal (horas) = " << tt*delta_t * THatSec / 3600.<< endl;
+    tempfile << "------------------------------------------------------" << endl;
+    
+    tempfile << " " << endl;
+    
+    tempfile.close();
+    
+    system("cp DataUsed.txt temp1.txt");
+    //    system("cat LogsLast.txt >> LogsData.txt");
+    
+    ifstream tempfile1;
+    tempfile1.open("temp1.txt");
+    
+    while (getline(tempfile1, tempinfo,'\n'))
+    {
+        cout << tempinfo << endl;
+    }
+    
+    tempfile1.close();
+    
+    system("rm temp1.txt");
+    
+}
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+// End Print Info
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+
 
 /////////////////////////////////////////
 /////////////////////////////////////////
@@ -407,10 +481,10 @@ int main (void){
     for (int iter=0; iter <= numiter; iter++) {
 
         Ant::DropletNumberToAdd = 0;
-
+        Ant::CurrentTime = iter*delta_t;
+        
         for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
             
-            Ant::CurrentTime = iter*delta_t;
 
             Pop[antnumber].Walk();
 
@@ -429,22 +503,17 @@ int main (void){
         
         Ant::DropletNumber += Ant::DropletNumberToAdd;
         
-        for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
-            
-//            if (ChangedSide == 1) {
-//                Pop[antnumber].AntFile << endl;
-//                ChangedSide = 0;
-//            }
-//            Pop[antnumber].AntFile << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
-            
-        }
-     
-//        Ant::Pheromone.Print();
+
         AntPos << Pop[0].AntPosX << "\t" << Pop[0].AntPosY << endl;
         
         cout << "Iter: " <<iter << endl;
+        cout << "DropletNumber: " << Ant::DropletNumber << endl;
+        cout << "InactiveDropletsCount: " << Ant::InactiveDropletsCount() << endl;
+        
     }// End of time cycle
     
+    
+    PrintInfo(delta_t,data.Comm, data);
     
 //    Ant::DropletCentersX.Print();
 //    Ant::DropletCentersY.Print();

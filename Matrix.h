@@ -107,10 +107,10 @@ public:
         //printf("Executing constructor Matrix() ...\n");
         // create a Matrix object without content
         p = NULL;
-        if (data.numxx > 0 && data.numyy > 0)
+        if (data.xx > 0 && data.yy > 0)
         {
-            rows = data.numxx;
-            cols = data.numyy;
+            rows = data.xx;
+            cols = data.yy;
             
             p = new double*[rows];
             for (int r = 0; r < rows; r++)

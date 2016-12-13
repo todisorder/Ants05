@@ -16,11 +16,13 @@ class Numerics {
     
 public:
     int numiter ;
-    double numxx = 10.;
-    double numyy = 10.;
+    double xx ;
+    double yy ;
     string Comm;
     
     Numerics (){
+        xx = numxx;
+        yy = numyy;
         cout << "Comments:" << endl;
         getline(cin, Comm, '\n');               // Nice... de http://www.cprogramming.com/tutorial/string.html
 //        cout << "// Number of x intervals:" << endl;
@@ -36,6 +38,7 @@ public:
     }
     
 };
+
 ////////////////////////////////////////////////////////
 // END Class Numerics (data)
 ////////////////////////////////////////////////////////
@@ -109,6 +112,7 @@ public:
     static Matrix Pheromone;
     static int DropletNumber;
     static int DropletNumberToAdd;
+    static int InactiveDropletsCount();
     static Matrix DropletTimes;
     static Matrix DropletCentersX;
     static Matrix DropletCentersY;
@@ -124,7 +128,7 @@ public:
     double AntHomeDirX;
     double AntHomeDirY;
     bool IsReturning;
-    Matrix AntDepositedPhero;
+    Matrix AntDepositedPhero;       // Deprecated! XXXXXXXXX
     string AntFilenamePos;
     string AntFilenameVel;
     ofstream AntFilePos;
@@ -144,7 +148,7 @@ public:
     
     //  Constructors
     Ant () : AntDepositedPhero(numxx, numyy){
-        AntPosX = 1.;
+        AntPosX = 0.;
         AntPosY = 0.;
         AntVelX = -0.1;
         AntVelY = 0.1;
@@ -173,6 +177,7 @@ double Ant::CurrentTime = 0.;
 Matrix Ant::Pheromone = Zeros(numxx,numyy);
 int Ant::DropletNumber = 1;
 int Ant::DropletNumberToAdd = 0;
+//int Ant::InactiveDropletsCount = 0;
 Matrix Ant::DropletCentersX = Zeros(LARGE_NUMBER,1);
 Matrix Ant::DropletCentersY = Zeros(LARGE_NUMBER,1);
 Matrix Ant::DropletTimes = Zeros(LARGE_NUMBER,1);
@@ -199,11 +204,11 @@ void Ant::Walk(){
     double jj = IndexYOf(AntPosY);
     //  Reset deposited pheromone
 //    AntDepositedPhero = 0.*AntDepositedPhero;     // This causes memory leak!!!
-    for (int i=1; i<=numxx; i++) {
-        for (int j=1; j<=numyy; j++) {
-            AntDepositedPhero(i,j) = 0.;
-        }
-    }
+//    for (int i=1; i<=numxx; i++) {
+//        for (int j=1; j<=numyy; j++) {
+//            AntDepositedPhero(i,j) = 0.;
+//        }
+//    }
     double AntXposNew;
     double AntYposNew;
     double AntVelXNew;
@@ -221,19 +226,19 @@ void Ant::Walk(){
     double Rzero = SmallNormal(generator);
 
     ////////////////////////////////////////////////////////
-    // Cálculo do Random Walk
+    // Random Walk
     ////////////////////////////////////////////////////////
     
     RandomWalkVelXnew = Rzero * cos(RandomAngle);
     RandomWalkVelYnew = Rzero * sin(RandomAngle);
 
     ////////////////////////////////////////////////////////
-    // End Cálculo do Random Walk
+    // End Random Walk
     ////////////////////////////////////////////////////////
 
     
     ////////////////////////////////////////////////////////
-    // Evolução
+    // Evolution
     ////////////////////////////////////////////////////////
 
     AntVelXNew = AntVelXOld + delta_t * ( -(1./TAU)*( AntVelXOld - ForceX() - RandomWalkVelXnew * Turn_off_random) );
@@ -246,11 +251,11 @@ void Ant::Walk(){
     AntYposNew = AntYposOld + delta_t * (AntVelYNew);
 
     ////////////////////////////////////////////////////////
-    // End Evolução
+    // End Evolution
     ////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////
-    // Fronteira PERIODIC!
+    // PERIODIC Boundary
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
@@ -273,13 +278,13 @@ void Ant::Walk(){
     }
     
     ////////////////////////////////////////////////////////
-    // End Fronteira PERIODIC!
+    // End PERIODIC Boundary
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
     
     ////////////////////////////////////////////////////////
-    // Atualização:
+    // Updating:
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////
@@ -298,7 +303,7 @@ void Ant::Walk(){
     
 //    cout <<"Acabo de marcar phero numero " << DropletNumber<< " no ponto (" << AntPosX<<","<<AntPosY<<")"<<endl;
     
-    DropletTimes(DropletNumber,1) = CurrentTime;
+    DropletTimes(DropletNumber+DropletNumberToAdd,1) = CurrentTime;
 
 }
 //////////////////////////////////////////////////////////////////////
@@ -312,25 +317,18 @@ void Ant::Walk(){
 //////////////////////////////////////////////////////////////////////
 
 double Ant::PheromoneConcentration(){
-//    double iofXpos = IndexXOf(AntPosX);
-//    double jofYpos = IndexYOf(AntPosY);
-////    cout << "AAAHH:   " << iofXpos << ",,,,"<< jofYpos << endl;
-////    cout << "Estou dentro de PheromoneConcentration:  " << Pheromone(1,1) <<endl;
-//    return SensitivityFunction(Pheromone(iofXpos,jofYpos));
-////    return Pheromone(iofXpos,jofYpos);
     
     double current_time = CurrentTime;
     double elapsed_time = 0.;
     double aux = 0.;
     
-    for (int droplet=1; droplet < DropletNumber ; droplet++) {
+    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber ; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
-
-//        cout <<"Acabo de ler phero numero " << droplet<< " no ponto (" << AntPosX<<","<<AntPosY<<"). "<< "Senti phero: " << SensitivityFunction(aux)<<endl;
         
     }
-//    cout << "Senti phero: " << (aux) <<endl;
+
+//    return 1.*PheroHigh*exp(-PheroNarrow*abs(AntPosX));   // To test with given trail!
     
     return SensitivityFunction(aux);
     
@@ -345,33 +343,31 @@ double Ant::PheromoneConcentration(){
 //                  Pointwise evaluation of Pheromone Gradient.
 //////////////////////////////////////////////////////////////////////
 double Ant::PheromoneGradientX(){
-//    double aux=0.;
-//    double iofXpos = IndexXOf(AntPosX);
-//    double jofYpos = IndexYOf(AntPosY);
-//    if (iofXpos < numxx) {
-//        aux = Pheromone(iofXpos+1,jofYpos) - Pheromone(iofXpos,jofYpos);
-//        aux = aux/delta_x;
-//    } else {
-//        aux = 0.;       // TEMP in boundary!!
-//    }
     
     double current_time = CurrentTime;
     double elapsed_time = 0.;
     double aux1 = 0.;
     double aux2 = 0.;
     double aux3 = 0.;
-    for (int droplet=1; droplet < DropletNumber; droplet++) {
+    double aux4 = 0.;
+    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         aux2 += Heat(AntPosX+0.001*delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
         aux3 += -2.*( (AntPosX-DropletCentersX(droplet,1))/(4.*Diffusion*elapsed_time)) * aux1;   //  real gradient
     }
+    
+
+
+    aux4 = - PheroNarrow*PheroHigh*Sinal(AntPosX)*exp(-PheroNarrow*abs(AntPosX));
+    
+    
+//    return aux4;    // To test with given trail!
+
+    return aux3;
 
     
-    
-//    return (aux2 - aux1)/(0.001*delta_x);
-    return aux3;
 }
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::PheromoneGradientX
@@ -400,7 +396,7 @@ double Ant::PheromoneGradientY(){
     double aux1 = 0.;
     double aux2 = 0.;
     double aux3 = 0.;
-    for (int droplet=1; droplet < DropletNumber; droplet++) {
+    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+0.001*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
@@ -411,8 +407,10 @@ double Ant::PheromoneGradientY(){
     
     
     
-//    return (aux2 - aux1)/(0.001*delta_y);
+    
+
     return aux3;
+//    return 0.;    // To test with given trail!
 
     
     
@@ -457,7 +455,7 @@ double Ant::ForceX(){
     + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
     * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
     
-    auxX = RegularizingFunction(auxX);
+//    auxX = SensitivityFunction(auxX);
     
     aux = aux/auxX;
     
@@ -498,7 +496,7 @@ double Ant::ForceY(){
     + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
     * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
     
-    auxY = RegularizingFunction(auxY);
+//    auxY = SensitivityFunction(auxY);
     
     aux = aux/auxY;
     
@@ -507,6 +505,32 @@ double Ant::ForceY(){
 //////////////////////////////////////////////////////////////////////
 //                  END Ant::ForceY
 //////////////////////////////////////////////////////////////////////
+
+
+
+int Ant::InactiveDropletsCount(){
+    
+    double current_time = CurrentTime;
+    double elapsed_time = 0.;
+    int aux = 0.;
+
+    for (int droplet=1; droplet < DropletNumber ; droplet++) {
+        elapsed_time = current_time - DropletTimes(droplet,1);
+   //         cout << "Hii!" << 4.*Pi*Diffusion*current_time*Threshold << endl;
+//        cout << exp(-Evaporation*elapsed_time) <<"<=" << 4.*Pi*Diffusion*elapsed_time*Threshold <<"?" <<endl;
+        if (exp(-Evaporation*elapsed_time) <= 4.*Pi*Diffusion*elapsed_time*Threshold) {
+            aux++;
+//            cout << "Hey!" << endl;
+
+        }
+        
+    }
+
+    return aux;
+    
+}
+
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -526,7 +550,7 @@ double Ant::ForceY(){
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-void Ant::UpdatePhero(Matrix& mat){
+void Ant::UpdatePhero(Matrix& mat){         //  I think this is no longer used...
     //  'mat' is the current ant's deposited pheromone.
     //  Adds the various AntDepositedPhero and then diffuses
     //  the pheromone.
@@ -556,6 +580,7 @@ void Ant::BuildPheromone(){
 
             
             Pheromone(i,j) = aux;
+//            Pheromone(i,j) = 1.*PheroHigh*exp(-PheroNarrow*abs(x_1+i*delta_x));   // To test with given trail!
         }
     }
 
