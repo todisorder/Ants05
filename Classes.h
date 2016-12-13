@@ -125,9 +125,10 @@ public:
     double AntHomeDirY;
     bool IsReturning;
     Matrix AntDepositedPhero;
-    string AntFilename;
-    ofstream AntFile;
-    
+    string AntFilenamePos;
+    string AntFilenameVel;
+    ofstream AntFilePos;
+    ofstream AntFileVel;
     
     void Walk();
     

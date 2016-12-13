@@ -22,10 +22,10 @@ using namespace std;
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-static double const numxx = 200.;
-static double const numyy = 200.;
+static double const numxx = 100.;
+static double const numyy = 100.;
 
-static int const NumberOfAnts = 2;
+static int const NumberOfAnts = 10;
 
 static int const LARGE_NUMBER = 100000;
 
@@ -174,7 +174,7 @@ static double const PheroHigh = 1.;
 //  com um risco do lado ao outro
 //  quando muda de lado por periodicidade
 ////////////////////////////
-int ChangedSide = 0;
+static int ChangedSide = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +279,7 @@ double Heat(double XX, double YY, double elapsed_time, double amount){
     
     aux = (1. / (4.*Pi* Diffusion * elapsed_time));
     aux *= exp(-(XX*XX + YY*YY) / (4.*Diffusion*elapsed_time));
-    aux *= exp(-.00001*elapsed_time); // Evaporation
+    aux *= exp(-.001*elapsed_time); // Evaporation
     aux *= amount;
     
     return aux;
@@ -383,9 +383,13 @@ int main (void){
     Pop = new Ant[NN];
 
     for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
-        Pop[antnumber].AntFilename = "AntPos-"+to_string(antnumber+1)+".txt";
-        Pop[antnumber].AntFile.open(Pop[antnumber].AntFilename);
-        cout << Pop[antnumber].AntFilename << endl;
+        Pop[antnumber].AntFilenamePos = "AntPos-"+to_string(antnumber+1)+".txt";
+        Pop[antnumber].AntFilePos.open(Pop[antnumber].AntFilenamePos);
+        cout << Pop[antnumber].AntFilenamePos << endl;
+        
+        Pop[antnumber].AntFilenameVel = "AntVel-"+to_string(antnumber+1)+".txt";
+        Pop[antnumber].AntFileVel.open(Pop[antnumber].AntFilenameVel);
+        cout << Pop[antnumber].AntFilenameVel << endl;
     }
     
     
@@ -410,8 +414,16 @@ int main (void){
 
             Pop[antnumber].Walk();
 
-            cout << "The ForceX:   " << Pop[antnumber].ForceX() << endl;
-            cout << "The ForceY:   " << Pop[antnumber].ForceY() << endl;
+            
+            if (ChangedSide == 1) {
+                Pop[antnumber].AntFilePos << endl;
+                ChangedSide = 0;
+            }
+            Pop[antnumber].AntFilePos << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
+            Pop[antnumber].AntFileVel << Pop[antnumber].AntVelX << "\t" << Pop[antnumber].AntVelY << endl;
+
+            //cout << "The ForceX:   " << Pop[antnumber].ForceX() << endl;
+            //cout << "The ForceY:   " << Pop[antnumber].ForceY() << endl;
 //            cout << "Deposited Phero:   " << Pop[antnumber].AntDepositedPhero(3,3) << endl;
         }
         
@@ -419,15 +431,11 @@ int main (void){
         
         for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
             
-//            Ant::UpdatePhero(Pop[antnumber].AntDepositedPhero);
-            
-//            cout << "DN = " << Ant::DropletNumber << endl;
-            if (ChangedSide == 1) {
-                Pop[antnumber].AntFile << endl;
-                ChangedSide = 0;
-            }
-
-            Pop[antnumber].AntFile << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
+//            if (ChangedSide == 1) {
+//                Pop[antnumber].AntFile << endl;
+//                ChangedSide = 0;
+//            }
+//            Pop[antnumber].AntFile << Pop[antnumber].AntPosX << "\t" << Pop[antnumber].AntPosY << endl;
             
         }
      
