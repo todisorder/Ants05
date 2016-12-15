@@ -25,9 +25,13 @@ using namespace std;
 static double const numxx = 100.;
 static double const numyy = 100.;
 
-static int const NumberOfAnts = 5;
+static int const NumberOfAnts = 1;
 
 static int const LARGE_NUMBER = 100000;
+
+static int const MaxActiveDroplets = 5000;
+
+static int const TestWithGivenTrail = 0;    // 1=true, 0=false
 
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;
@@ -45,7 +49,7 @@ uniform_real_distribution<double> Uniform(0.,2.*Pi);      // Uniformly distribut
 // Normal(mean,stddev)
 // Usage:
 // double number = Normal(generator);
-static double const Turn_off_random = 1.*1.;    //*0.02;
+static double const Turn_off_random = 0.*1.;    //*0.02;
 //  ^^^ 0. = No Random!
 
 //	Parameter for Regularizing Function
@@ -74,7 +78,7 @@ static double const tau = .25;         //    0.5
 static double const TAU = tau / t_hat_in_seconds;         //
 
 //  Sensing area radius em centimetros
-static double const SensingAreaRadius = .4;         //  .5
+static double const SensingAreaRadius = .4;         //  .4
 
 //  Sensing area radius em X_hat
 static double const SENSING_AREA_RADIUS = SensingAreaRadius / X_hat_in_cm;         //
@@ -115,7 +119,7 @@ static double const Evaporation = 0.005;        //0.001
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 1.*.00001;        //0.00001
+static double const DropletAmount = 0.*.10*.00001;        //0.00001
 
 string SensitivityMethod;
 
@@ -167,7 +171,7 @@ static double const delta_y = (y_2-y_1)/numyy;;
 // Parametro temporário para a pheromone
 ////////////////////////////
 static double const PheroNarrow = 5.;
-static double const PheroHigh = .0002;
+static double const PheroHigh = .02;
 ////////////////////////////
 // End Parametro temporário para a pheromone
 ////////////////////////////
