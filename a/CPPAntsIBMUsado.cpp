@@ -119,7 +119,7 @@ static double const Evaporation = 0.005;        //0.001
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 0.*.10*.00001;        //0.00001
+static double const DropletAmount = 1.*.10*.00001;        //0.00001
 
 string SensitivityMethod;
 

@@ -175,7 +175,7 @@ public:
 };
 double Ant::CurrentTime = 0.;
 Matrix Ant::Pheromone = Zeros(numxx,numyy);
-int Ant::DropletNumber = 1;
+int Ant::DropletNumber = 0;
 int Ant::DropletNumberToAdd = 0;
 //int Ant::InactiveDropletsCount = 0;
 Matrix Ant::DropletCentersX = Zeros(LARGE_NUMBER,1);
@@ -582,9 +582,9 @@ void Ant::BuildPheromone(){
     for (int i=1; i<=numxx; i++) {
         for (int j=1; j<=numyy; j++) {
             aux = 0.;
-            for (int droplet=1; droplet < DropletNumber-DropletNumberToAdd; droplet++) {
+            for (int droplet=1; droplet < DropletNumber-DropletNumberToAdd; droplet++) {    // Do not read the last droplets, they are deltas.
                 elapsed_time = current_time - DropletTimes(droplet,1);
-//                cout << "active droplet " << droplet << endl;
+		// cout << "active droplet " << droplet << endl;
                 aux += Heat(x_1+i*delta_x-DropletCentersX(droplet,1),y_1+j*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
                 
             }
