@@ -332,7 +332,7 @@ double Ant::PheromoneConcentration(){
 
     aux1 = 1.*PheroHigh*exp(-PheroNarrow*abs(AntPosX));   // To test with given trail!
     int test = TestWithGivenTrail;
-  cout << "Phero: " <<SensitivityFunction(aux) + test*SensitivityFunction(aux1) << endl;
+//  cout << "Phero: " <<SensitivityFunction(aux) + test*SensitivityFunction(aux1) << endl;
     return SensitivityFunction(aux) + test*SensitivityFunction(aux1);
     
 }
@@ -452,25 +452,25 @@ double Ant::ForceX(){
     double A12 = sin(2.*SensingAreaHalfAngle)/2.
     * sin(2.*Angle(AntVelX,AntVelY));
     
-    aux = (2./3.) * pow(SENSING_AREA_RADIUS,3.) * Lambda * cos(Angle(AntVelX,AntVelY))
+    aux = (2./3.) * SENSING_AREA_RADIUS * Lambda * cos(Angle(AntVelX,AntVelY))
     * PheromoneConcentration() * sin(SensingAreaHalfAngle)
-    + (1./4.)*pow(SENSING_AREA_RADIUS,4.) * Lambda
+    + (1./4.)*pow(SENSING_AREA_RADIUS,2.) * Lambda
     * (SensingAreaHalfAngle * PheromoneGradientX()
        + A11 * PheromoneGradientX() + A12 * PheromoneGradientY());
     
-    auxX = PheromoneConcentration()*SENSING_AREA_RADIUS*SENSING_AREA_RADIUS
-    * SensingAreaHalfAngle
-    + PheromoneGradientX() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+    auxX = PheromoneConcentration()*SensingAreaHalfAngle
+    + PheromoneGradientX() * (2./3.) * SENSING_AREA_RADIUS
     * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
-    + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+    + PheromoneGradientY() * (2./3.) * SENSING_AREA_RADIUS
     * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
     
 //    auxX = SensitivityFunction(auxX);
     
     aux = aux/auxX;
     
-    cout << "Grad x: " << PheromoneGradientX() << endl;
-    cout << "Grad y: " << PheromoneGradientY() << endl;
+    cout << "Normalization: " << auxX << endl;
+//    cout << "Grad x: " << PheromoneGradientX() << endl;
+//    cout << "Grad y: " << PheromoneGradientY() << endl;
     
     return aux;
 }
