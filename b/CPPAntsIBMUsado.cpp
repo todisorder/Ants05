@@ -25,13 +25,13 @@ using namespace std;
 static double const numxx = 200.;
 static double const numyy = 200.;
 
-static int const NumberOfAnts = 1;
+static int const NumberOfAnts = 5;
 
 static int const LARGE_NUMBER = 100000;
 
 static int const MaxActiveDroplets = 5000;
 
-static int const TestWithGivenTrail = 1;    // 1=true, 0=false
+static int const TestWithGivenTrail = 0;    // 1=true, 0=false
 
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;

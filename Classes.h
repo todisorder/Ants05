@@ -175,7 +175,7 @@ public:
 };
 double Ant::CurrentTime = 0.;
 Matrix Ant::Pheromone = Zeros(numxx,numyy);
-int Ant::DropletNumber = 1;
+int Ant::DropletNumber = 0;
 int Ant::DropletNumberToAdd = 0;
 //int Ant::InactiveDropletsCount = 0;
 Matrix Ant::DropletCentersX = Zeros(LARGE_NUMBER,1);
@@ -321,16 +321,19 @@ double Ant::PheromoneConcentration(){
     double current_time = CurrentTime;
     double elapsed_time = 0.;
     double aux = 0.;
+    double aux1 = 0.;
+    int Max = MaxActiveDroplets;
     
-    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber ; droplet++) {
+    for (int droplet=max(1,DropletNumber-Max); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
     }
 
-//    return 1.*PheroHigh*exp(-PheroNarrow*abs(AntPosX));   // To test with given trail!
-    
-    return SensitivityFunction(aux);
+    aux1 = 1.*PheroHigh*exp(-PheroNarrow*abs(AntPosX));   // To test with given trail!
+    int test = TestWithGivenTrail;
+//  cout << "Phero: " <<SensitivityFunction(aux) + test*SensitivityFunction(aux1) << endl;
+    return SensitivityFunction(aux) + test*SensitivityFunction(aux1);
     
 }
 //////////////////////////////////////////////////////////////////////
@@ -350,7 +353,9 @@ double Ant::PheromoneGradientX(){
     double aux2 = 0.;
     double aux3 = 0.;
     double aux4 = 0.;
-    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber; droplet++) {
+    int Max = MaxActiveDroplets;
+
+    for (int droplet=max(1,DropletNumber-Max); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         aux2 += Heat(AntPosX+0.001*delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
@@ -365,7 +370,10 @@ double Ant::PheromoneGradientX(){
     
 //    return aux4;    // To test with given trail!
 
-    return aux3;
+    int test = TestWithGivenTrail;
+
+    //cout << "grad x: " <<  aux3 + test*aux4 << endl;
+    return aux3 + test*aux4;
 
     
 }
@@ -396,7 +404,9 @@ double Ant::PheromoneGradientY(){
     double aux1 = 0.;
     double aux2 = 0.;
     double aux3 = 0.;
-    for (int droplet=max(1,DropletNumber-2000); droplet < DropletNumber; droplet++) {
+    int Max = MaxActiveDroplets;
+
+    for (int droplet=max(1,DropletNumber-Max); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+0.001*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
@@ -442,24 +452,25 @@ double Ant::ForceX(){
     double A12 = sin(2.*SensingAreaHalfAngle)/2.
     * sin(2.*Angle(AntVelX,AntVelY));
     
-    aux = (2./3.) * pow(SENSING_AREA_RADIUS,3.) * Lambda * cos(Angle(AntVelX,AntVelY))
+    aux = (2./3.) * SENSING_AREA_RADIUS * Lambda * cos(Angle(AntVelX,AntVelY))
     * PheromoneConcentration() * sin(SensingAreaHalfAngle)
-    + (1./4.)*pow(SENSING_AREA_RADIUS,4.) * Lambda
+    + (1./4.)*pow(SENSING_AREA_RADIUS,2.) * Lambda
     * (SensingAreaHalfAngle * PheromoneGradientX()
        + A11 * PheromoneGradientX() + A12 * PheromoneGradientY());
     
-    auxX = PheromoneConcentration()*SENSING_AREA_RADIUS*SENSING_AREA_RADIUS
-    * SensingAreaHalfAngle
-    + PheromoneGradientX() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+    auxX = PheromoneConcentration()*SensingAreaHalfAngle
+    + PheromoneGradientX() * (2./3.) * SENSING_AREA_RADIUS
     * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
-    + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+    + PheromoneGradientY() * (2./3.) * SENSING_AREA_RADIUS
     * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
     
 //    auxX = SensitivityFunction(auxX);
     
     aux = aux/auxX;
     
+    cout << "Normalization: " << auxX << endl;
 //    cout << "Grad x: " << PheromoneGradientX() << endl;
+//    cout << "Grad y: " << PheromoneGradientY() << endl;
     
     return aux;
 }
@@ -571,16 +582,16 @@ void Ant::BuildPheromone(){
     for (int i=1; i<=numxx; i++) {
         for (int j=1; j<=numyy; j++) {
             aux = 0.;
-            for (int droplet=1; droplet < DropletNumber-DropletNumberToAdd; droplet++) {
+            for (int droplet=1; droplet < DropletNumber-DropletNumberToAdd; droplet++) {    // Do not read the last droplets, they are deltas.
                 elapsed_time = current_time - DropletTimes(droplet,1);
-//                cout << "active droplet " << droplet << endl;
+		// cout << "active droplet " << droplet << endl;
                 aux += Heat(x_1+i*delta_x-DropletCentersX(droplet,1),y_1+j*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
                 
             }
 
             
             Pheromone(i,j) = aux;
-//            Pheromone(i,j) = 1.*PheroHigh*exp(-PheroNarrow*abs(x_1+i*delta_x));   // To test with given trail!
+            Pheromone(i,j) += TestWithGivenTrail*PheroHigh*exp(-PheroNarrow*abs(x_1+i*delta_x));   // To test with given trail!
         }
     }
 

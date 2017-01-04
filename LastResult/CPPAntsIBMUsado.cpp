@@ -22,12 +22,16 @@ using namespace std;
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-static double const numxx = 100.;
-static double const numyy = 100.;
+static double const numxx = 200.;
+static double const numyy = 200.;
 
-static int const NumberOfAnts = 5;
+static int const NumberOfAnts = 1;
 
 static int const LARGE_NUMBER = 100000;
+
+static int const MaxActiveDroplets = 5000;
+
+static int const TestWithGivenTrail = 1;    // 1=true, 0=false
 
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;
@@ -74,7 +78,7 @@ static double const tau = .25;         //    0.5
 static double const TAU = tau / t_hat_in_seconds;         //
 
 //  Sensing area radius em centimetros
-static double const SensingAreaRadius = .4;         //  .5
+static double const SensingAreaRadius = .4;         //  .4
 
 //  Sensing area radius em X_hat
 static double const SENSING_AREA_RADIUS = SensingAreaRadius / X_hat_in_cm;         //
@@ -108,14 +112,14 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 static double const delta_t = 0.05;   //     0.05
 
 //  Pheromone Diffusion:
-static double const Diffusion = 0.005;
+static double const Diffusion = 0.0002;      // .005
 
 //  Pheromone Evaporation:
 static double const Evaporation = 0.005;        //0.001
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 1.*.00001;        //0.00001
+static double const DropletAmount = 0.*.10*.00001;        //0.00001
 
 string SensitivityMethod;
 
@@ -167,7 +171,7 @@ static double const delta_y = (y_2-y_1)/numyy;;
 // Parametro temporário para a pheromone
 ////////////////////////////
 static double const PheroNarrow = 5.;
-static double const PheroHigh = .0002;
+static double const PheroHigh = .02;
 ////////////////////////////
 // End Parametro temporário para a pheromone
 ////////////////////////////
@@ -478,7 +482,7 @@ int main (void){
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    for (int iter=0; iter <= numiter; iter++) {
+    for (int iter=1; iter <= numiter; iter++) {
 
         Ant::DropletNumberToAdd = 0;
         Ant::CurrentTime = iter*delta_t;
@@ -487,7 +491,6 @@ int main (void){
             
 
             Pop[antnumber].Walk();
-
             
             if (ChangedSide == 1) {
                 Pop[antnumber].AntFilePos << endl;
