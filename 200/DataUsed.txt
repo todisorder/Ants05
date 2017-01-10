@@ -2,17 +2,17 @@
 #############################################################
 #############################################################
 # dt = 0.05
-# No. of Iterations = 200
-# Final Time = 10
+# No. of Iterations = 600
+# Final Time = 30
 #	
-# X points = 200
-# Y points = 200
+# X points = 100
+# Y points = 100
 ------------------------------------------------------
 Sensing Area Radius (cm)       0.4
 Sensing Area Radius (X_hat)    0.231214
 Sensing Half Angle             Pi/4
 Lambda                         1
-Diffusion                      0.0002
+Diffusion                      0.005
 Evaporation                    0.005
 Droplet Amount                 0
 ------------------------------------------------------

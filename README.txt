@@ -1,4 +1,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Ants05
+https://github.com/todisorder/Ants05.git
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+>> 10 Janeiro 2017
+> Funciona bem, defini a fero analiticamente,
+	Mas no final não dá porque, como é o problema linearizado,
+	a normalização dá negativa, que não pode!
+> Mas consegue bem o caso do trilho dado.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Ants IBM GitHub:
 New Repository
 https://github.com/todisorder/Ants05.git

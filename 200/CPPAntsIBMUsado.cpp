@@ -22,8 +22,8 @@ using namespace std;
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-static double const numxx = 200.;
-static double const numyy = 200.;
+static double const numxx = 100.;
+static double const numyy = 100.;
 
 static int const NumberOfAnts = 1;
 
@@ -31,7 +31,7 @@ static int const LARGE_NUMBER = 100000;
 
 static int const MaxActiveDroplets = 5000;
 
-static int const TestWithGivenTrail = 1;    // 1=true, 0=false
+static int const TestWithGivenTrail = 0;    // 1=true, 0=false
 
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;
@@ -49,7 +49,7 @@ uniform_real_distribution<double> Uniform(0.,2.*Pi);      // Uniformly distribut
 // Normal(mean,stddev)
 // Usage:
 // double number = Normal(generator);
-static double const Turn_off_random = 1.*1.;    //*0.02;
+static double const Turn_off_random = 0.*1.;    //*0.02;
 //  ^^^ 0. = No Random!
 
 //	Parameter for Regularizing Function
@@ -112,7 +112,7 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 static double const delta_t = 0.05;   //     0.05
 
 //  Pheromone Diffusion:
-static double const Diffusion = 0.0002;      // .005
+static double const Diffusion = 0.005;
 
 //  Pheromone Evaporation:
 static double const Evaporation = 0.005;        //0.001
@@ -482,7 +482,7 @@ int main (void){
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    for (int iter=1; iter <= numiter; iter++) {
+    for (int iter=0; iter <= numiter; iter++) {
 
         Ant::DropletNumberToAdd = 0;
         Ant::CurrentTime = iter*delta_t;
@@ -491,6 +491,7 @@ int main (void){
             
 
             Pop[antnumber].Walk();
+
             
             if (ChangedSide == 1) {
                 Pop[antnumber].AntFilePos << endl;
