@@ -1,20 +1,25 @@
 #############################################################
 #############################################################
 #############################################################
-# dt = 0.05
-# No. of Iterations = 200
+# dt = 0.01
+# No. of Iterations = 1000
 # Final Time = 10
 #	
-# X points = 200
-# Y points = 200
+# X points = 100
+# Y points = 100
+Domain Info:
+Domain (Nondimensional)  = [-14.4509,14.4509] x [-14.4509,14.4509]
+Domain (Cm)  = [-25,25] cm x [-25,25] cm
 ------------------------------------------------------
-Sensing Area Radius (cm)       0.4
-Sensing Area Radius (X_hat)    0.231214
+Random is 1 times normal strength.
+------------------------------------------------------
+Sensing Area Radius (cm)       0.1
+Sensing Area Radius (X_hat)    0.0578035
 Sensing Half Angle             Pi/4
-Lambda                         1
+Lambda                         15
 Diffusion                      0.0002
 Evaporation                    0.005
-Droplet Amount                 0
+Droplet Amount                 1e-11
 ------------------------------------------------------
 ------------------------------------------------------
  

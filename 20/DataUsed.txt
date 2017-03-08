@@ -1,20 +1,20 @@
 #############################################################
 #############################################################
 #############################################################
-# dt = 0.05
+# dt = 0.01
 # No. of Iterations = 2000
-# Final Time = 100
+# Final Time = 20
 #	
 # X points = 100
 # Y points = 100
 ------------------------------------------------------
-Sensing Area Radius (cm)       0.4
-Sensing Area Radius (X_hat)    0.231214
+Sensing Area Radius (cm)       0.2
+Sensing Area Radius (X_hat)    0.115607
 Sensing Half Angle             Pi/4
 Lambda                         1
-Diffusion                      0.005
-Evaporation                    0.03
-Droplet Amount                 0
+Diffusion                      0.0002
+Evaporation                    0.005
+Droplet Amount                 1e-11
 ------------------------------------------------------
 ------------------------------------------------------
  

@@ -358,7 +358,7 @@ double Ant::PheromoneGradientX(){
     for (int droplet=max(1,DropletNumber-Max); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
-        aux2 += Heat(AntPosX+0.001*delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+//        aux2 += Heat(AntPosX+0.001*delta_x-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
         aux3 += -2.*( (AntPosX-DropletCentersX(droplet,1))/(4.*Diffusion*elapsed_time)) * aux1;   //  real gradient
     }
@@ -409,7 +409,7 @@ double Ant::PheromoneGradientY(){
     for (int droplet=max(1,DropletNumber-Max); droplet < DropletNumber; droplet++) {
         elapsed_time = current_time - DropletTimes(droplet,1);
         aux1 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
-        aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+0.001*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
+//        aux2 += Heat(AntPosX-DropletCentersX(droplet,1),AntPosY+0.001*delta_y-DropletCentersY(droplet,1),elapsed_time,DropletAmount);
         
         aux3 += -2.*( (AntPosY-DropletCentersY(droplet,1))/(4.*Diffusion*elapsed_time)) * aux1;   //  real gradient
 
@@ -446,31 +446,41 @@ double Ant::ForceX(){
     double aux=0.;
     double auxX=0.;
     
-    double A11 = sin(2.*SensingAreaHalfAngle)/2.
-    * cos(2.*Angle(AntVelX,AntVelY));
+    double A11 = cos(2.*Angle(AntVelX,AntVelY));
+    double A12 = sin(2.*Angle(AntVelX,AntVelY));
     
-    double A12 = sin(2.*SensingAreaHalfAngle)/2.
-    * sin(2.*Angle(AntVelX,AntVelY));
+    double MAT11 = 1. + (sin(2.*SensingAreaHalfAngle)/(2.*SensingAreaHalfAngle))
+    * A11;
+    
+    double MAT12 = (sin(2.*SensingAreaHalfAngle)/(2.*SensingAreaHalfAngle))
+    * A12;
+    
+//    aux = (2./3.) * SENSING_AREA_RADIUS * Lambda * cos(Angle(AntVelX,AntVelY))
+//    * PheromoneConcentration() * sin(SensingAreaHalfAngle)
+//    + (1./4.)*pow(SENSING_AREA_RADIUS,2.) * Lambda
+//    * (SensingAreaHalfAngle * PheromoneGradientX()
+//       + A11 * PheromoneGradientX() + A12 * PheromoneGradientY());
+//    
+//    auxX = PheromoneConcentration()*SensingAreaHalfAngle
+//    + PheromoneGradientX() * (2./3.) * SENSING_AREA_RADIUS
+//    * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
+//    + PheromoneGradientY() * (2./3.) * SENSING_AREA_RADIUS
+//    * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
+
     
     aux = (2./3.) * SENSING_AREA_RADIUS * Lambda * cos(Angle(AntVelX,AntVelY))
-    * PheromoneConcentration() * sin(SensingAreaHalfAngle)
+    * sin(SensingAreaHalfAngle) / SensingAreaHalfAngle
     + (1./4.)*pow(SENSING_AREA_RADIUS,2.) * Lambda
-    * (SensingAreaHalfAngle * PheromoneGradientX()
-       + A11 * PheromoneGradientX() + A12 * PheromoneGradientY());
-    
-    auxX = PheromoneConcentration()*SensingAreaHalfAngle
-    + PheromoneGradientX() * (2./3.) * SENSING_AREA_RADIUS
-    * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
-    + PheromoneGradientY() * (2./3.) * SENSING_AREA_RADIUS
-    * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
-    
+    * (MAT11*PheromoneGradientX() + MAT12*PheromoneGradientY() ) / PheromoneConcentration();
+
 //    auxX = SensitivityFunction(auxX);
     
-    aux = aux/auxX;
-    
-    cout << "Normalization: " << auxX << endl;
+//    aux = aux/auxX;
+//    
+//    cout << "Force X: " << aux << endl;
 //    cout << "Grad x: " << PheromoneGradientX() << endl;
 //    cout << "Grad y: " << PheromoneGradientY() << endl;
+//    cout << "Phero : " << PheromoneConcentration() << endl;
     
     return aux;
 }
@@ -487,29 +497,49 @@ double Ant::ForceY(){
     double aux=0.;
     double auxY=0.;
     
-    double A22 = - sin(2.*SensingAreaHalfAngle)/2.
-    * cos(2.*Angle(AntVelX,AntVelY));
+    double A21 = sin(2.*Angle(AntVelX,AntVelY));
+    double A22 = - cos(2.*Angle(AntVelX,AntVelY));
     
-    double A21 = sin(2.*SensingAreaHalfAngle)/2.
-    * sin(2.*Angle(AntVelX,AntVelY));
+    double MAT21 = (sin(2.*SensingAreaHalfAngle)/(2.*SensingAreaHalfAngle))
+    * A21;
     
-    aux = (2./3.) *  pow(SENSING_AREA_RADIUS,3.) * Lambda * sin(Angle(AntVelX,AntVelY))
-    * PheromoneConcentration() * sin(SensingAreaHalfAngle)
-    + (1./4.)*pow(SENSING_AREA_RADIUS,4.) * Lambda
-    * (SensingAreaHalfAngle * PheromoneGradientY()
-       + A21 * PheromoneGradientX() + A22 * PheromoneGradientY())
-    ;
+    double MAT22 = 1. + (sin(2.*SensingAreaHalfAngle)/(2.*SensingAreaHalfAngle))
+    * A22;
+
+    aux = (2./3.) * SENSING_AREA_RADIUS * Lambda * sin(Angle(AntVelX,AntVelY))
+    * sin(SensingAreaHalfAngle) / SensingAreaHalfAngle
+    + (1./4.)*pow(SENSING_AREA_RADIUS,2.) * Lambda
+    * (MAT21*PheromoneGradientX() + MAT22*PheromoneGradientY() ) / PheromoneConcentration();
+
     
-    auxY = PheromoneConcentration()*SENSING_AREA_RADIUS*SENSING_AREA_RADIUS
-    * SensingAreaHalfAngle
-    + PheromoneGradientX() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
-    * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
-    + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
-    * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
+    
+    
+    
+    
+    
+//    double A22 = - sin(2.*SensingAreaHalfAngle)/2.
+//    * cos(2.*Angle(AntVelX,AntVelY));
+//    
+//    double A21 = sin(2.*SensingAreaHalfAngle)/2.
+//    * sin(2.*Angle(AntVelX,AntVelY));
+//    
+//    aux = (2./3.) *  pow(SENSING_AREA_RADIUS,3.) * Lambda * sin(Angle(AntVelX,AntVelY))
+//    * PheromoneConcentration() * sin(SensingAreaHalfAngle)
+//    + (1./4.)*pow(SENSING_AREA_RADIUS,4.) * Lambda
+//    * (SensingAreaHalfAngle * PheromoneGradientY()
+//       + A21 * PheromoneGradientX() + A22 * PheromoneGradientY())
+//    ;
+//    
+//    auxY = PheromoneConcentration()*SENSING_AREA_RADIUS*SENSING_AREA_RADIUS
+//    * SensingAreaHalfAngle
+//    + PheromoneGradientX() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+//    * cos(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle)
+//    + PheromoneGradientY() * (2./3.) * pow(SENSING_AREA_RADIUS,3.)
+//    * sin(Angle(AntVelX,AntVelY)) * sin(SensingAreaHalfAngle);
     
 //    auxY = SensitivityFunction(auxY);
     
-    aux = aux/auxY;
+//    aux = aux/auxY;
     
     return aux;
 }

@@ -22,16 +22,16 @@ using namespace std;
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-static double const numxx = 200.;
-static double const numyy = 200.;
+static double const numxx = 100.;
+static double const numyy = 100.;
 
-static int const NumberOfAnts = 1;
+static int const NumberOfAnts = 4;
 
 static int const LARGE_NUMBER = 100000;
 
 static int const MaxActiveDroplets = 5000;
 
-static int const TestWithGivenTrail = 1;    // 1=true, 0=false
+static int const TestWithGivenTrail = 0;    // 1=true, 0=false
 
 //static double const Pi = 3.14159;
 static double const Pi =  3.1415926535;
@@ -56,7 +56,7 @@ static double const Turn_off_random = 1.*1.;    //*0.02;
 static double const RegularizingEpsilon = 0.01;
 
 //  This is pheromone detection threshold, but not exactly. It's complicated.
-static double const Threshold = 0.00001; //   Explained in the Readme...   0.1
+static double const Threshold = 0.001; //   Explained in the Readme...   0.1
 
 
 //////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ static double const t_hat_in_seconds = 1.;
 static double const X_hat_in_cm = 1.73;
 
 //  Relaxation time tau em segundos:
-static double const tau = .25;         //    0.5
+static double const tau = .1;         //    0.25
 
 //  Nondimensional relaxation TAU = (t_hat / tau)^(-1).
 //  Deve ser o relaxation time nas unidades t_hat.
@@ -78,7 +78,7 @@ static double const tau = .25;         //    0.5
 static double const TAU = tau / t_hat_in_seconds;         //
 
 //  Sensing area radius em centimetros
-static double const SensingAreaRadius = .4;         //  .4
+static double const SensingAreaRadius = .1;         //  .2
 
 //  Sensing area radius em X_hat
 static double const SENSING_AREA_RADIUS = SensingAreaRadius / X_hat_in_cm;         //
@@ -100,7 +100,7 @@ static double const SensingAreaHalfAngle = Pi/4.;         //
 //static double const Lambda = .5* (3./2.) *(1./(SensingAreaHalfAngle * pow(SENSING_AREA_RADIUS,3.)));        //
 
 //	With Weber's Law, Lambda may be ~ 1 ??
-static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
+static double const Lambda = 15.;         //10./SENSING_AREA_RADIUS;????
 
 //////////////////////////////////////////////////////
 // End Ant parameters
@@ -109,7 +109,7 @@ static double const Lambda = 1.;         //10./SENSING_AREA_RADIUS;????
 
 // tempo final
 //static double const TFINAL = 0.1;
-static double const delta_t = 0.05;   //     0.05
+static double const delta_t = 0.01;   //     0.05
 
 //  Pheromone Diffusion:
 static double const Diffusion = 0.0002;      // .005
@@ -119,7 +119,7 @@ static double const Evaporation = 0.005;        //0.001
 
 //  How much pheromone each ant deposits... not sure if I want this,
 //  or the member vector in the Ant class.
-static double const DropletAmount = 0.*.10*.00001;        //0.00001
+static double const DropletAmount = 10.*.10*.00000000001;        //0.00001
 
 string SensitivityMethod;
 
@@ -171,7 +171,7 @@ static double const delta_y = (y_2-y_1)/numyy;;
 // Parametro temporário para a pheromone
 ////////////////////////////
 static double const PheroNarrow = 5.;
-static double const PheroHigh = .02;
+static double const PheroHigh = .5;
 ////////////////////////////
 // End Parametro temporário para a pheromone
 ////////////////////////////
@@ -387,6 +387,11 @@ void PrintInfo(double delta_t, string COMM, Numerics data){
     tempfile << "#" << "\t" << COMM <<endl;
     tempfile << "# X points = "<< data.xx << endl;
     tempfile << "# Y points = "<< data.yy << endl;
+    tempfile << "Domain Info:" << endl;
+    tempfile << "Domain (Nondimensional)  = [" << x_1 << "," << x_2 << "] x [" << y_1 << "," << y_2 << "]" << endl;
+    tempfile << "Domain (Cm)  = [" << x_1_cm << "," << x_2_cm << "] cm x [" << y_1_cm << "," << y_2_cm << "] cm" << endl;
+    tempfile << "------------------------------------------------------" << endl;
+    tempfile << "Random is " << Turn_off_random << " times normal strength." << endl;
     tempfile << "------------------------------------------------------" << endl;
     tempfile << "Sensing Area Radius (cm)       " << SensingAreaRadius << endl;
     tempfile << "Sensing Area Radius (X_hat)    " << SENSING_AREA_RADIUS << endl;
@@ -461,6 +466,11 @@ int main (void){
     Pop = new Ant[NN];
 
     for (int antnumber=0; antnumber < totalantnumber; antnumber++) {
+        
+        //  Random initial velocities
+        Pop[antnumber].AntVelX = 0.1*cos(Normal(generator));
+        Pop[antnumber].AntVelY = 0.1*sin(Normal(generator));
+
         Pop[antnumber].AntFilenamePos = "AntPos-"+to_string(antnumber+1)+".txt";
         Pop[antnumber].AntFilePos.open(Pop[antnumber].AntFilenamePos);
         cout << Pop[antnumber].AntFilenamePos << endl;

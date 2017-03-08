@@ -8,7 +8,7 @@ https://github.com/todisorder/Ants05.git
 	Mas no final não dá porque, como é o problema linearizado,
 	a normalização dá negativa, que não pode!
 > Mas consegue bem o caso do trilho dado.
-
+> 7 março: vou fazer com normalização de ordem zero, deve dar!
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Ants IBM GitHub:
