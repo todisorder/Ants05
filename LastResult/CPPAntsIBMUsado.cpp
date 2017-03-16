@@ -25,7 +25,7 @@ using namespace std;
 static double const numxx = 100.;
 static double const numyy = 100.;
 
-static int const NumberOfAnts = 4;
+static int const NumberOfAnts = 3;
 
 static int const LARGE_NUMBER = 100000;
 
